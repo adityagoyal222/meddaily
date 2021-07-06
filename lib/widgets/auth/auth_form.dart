@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 
 class AuthForm extends StatefulWidget {
-  AuthForm(this.isLogin);
+  AuthForm(this.isLogin, this.submitfn, this.isLoading);
   final bool isLogin;
+  final void Function(
+    String email,
+    String password,
+    String name,
+    bool isLogin,
+  ) submitfn;
+  final bool isLoading;
   @override
   _AuthFormState createState() => _AuthFormState();
 }
@@ -17,7 +24,6 @@ class _AuthFormState extends State<AuthForm> {
   String _userEmail = '';
   String _name = '';
   String _userPassword = '';
-  File? _userImageFile;
 
   Color getColor(isLogin, hasFocus) {
     if (hasFocus) {
@@ -27,6 +33,22 @@ class _AuthFormState extends State<AuthForm> {
       return Theme.of(context).primaryColor;
     }
     return Theme.of(context).accentColor;
+  }
+
+  void _trySubmit() {
+    final isValid = _formKey.currentState!.validate();
+
+    FocusScope.of(context).unfocus();
+
+    if (isValid) {
+      _formKey.currentState!.save();
+      widget.submitfn(
+        _userEmail.trim(),
+        _userPassword.trim(),
+        _name.trim(),
+        widget.isLogin,
+      );
+    }
   }
 
   @override
@@ -105,6 +127,11 @@ class _AuthFormState extends State<AuthForm> {
               ),
               TextFormField(
                 focusNode: emailNode,
+                style: TextStyle(
+                  color: widget.isLogin
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).accentColor,
+                ),
                 key: ValueKey('email'),
                 validator: (value) {
                   if (value!.isEmpty || !value.contains('@')) {
@@ -151,6 +178,11 @@ class _AuthFormState extends State<AuthForm> {
               ),
               TextFormField(
                 focusNode: passwordNode,
+                style: TextStyle(
+                  color: widget.isLogin
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).accentColor,
+                ),
                 key: ValueKey('password'),
                 validator: (value) {
                   if (value!.isEmpty || value.length < 7) {
@@ -187,25 +219,27 @@ class _AuthFormState extends State<AuthForm> {
               SizedBox(
                 height: 12,
               ),
-              ButtonTheme(
-                buttonColor: Color(0XFF7DEA82),
-                minWidth: double.infinity,
-                height: 55,
-                child: RaisedButton(
-                  onPressed: () {},
-                  child: Text(
-                    widget.isLogin ? 'Login' : 'Create Account',
-                    style: TextStyle(
-                      // fontWeight: FontWeight.bold,
-                      fontSize: 20,
+              if (widget.isLoading) CircularProgressIndicator(),
+              if (!widget.isLoading)
+                ButtonTheme(
+                  buttonColor: Color(0XFF7DEA82),
+                  minWidth: double.infinity,
+                  height: 55,
+                  child: RaisedButton(
+                    onPressed: _trySubmit,
+                    child: Text(
+                      widget.isLogin ? 'Login' : 'Create Account',
+                      style: TextStyle(
+                        // fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
                 ),
-              ),
             ],
           ),
         ),

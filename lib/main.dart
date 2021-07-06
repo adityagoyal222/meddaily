@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:meddaily/screens/auth_screen.dart';
+import 'package:meddaily/screens/home_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -47,7 +50,31 @@ class MyApp extends StatelessWidget {
           disabledColor: Colors.grey,
         ),
       ),
-      home: AuthScreen(),
+      home: FutureBuilder(
+        future: Firebase.initializeApp(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Error Occurred"),
+                backgroundColor: Theme.of(context).errorColor,
+              ),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return StreamBuilder(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (ctx, userSnapshot) {
+              if (userSnapshot.hasData) {
+                return HomeScreen();
+              }
+              return AuthScreen();
+            },
+          );
+        },
+      ),
     );
   }
 }
