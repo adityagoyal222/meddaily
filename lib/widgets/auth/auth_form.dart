@@ -9,6 +9,7 @@ class AuthForm extends StatefulWidget {
     String password,
     String name,
     bool isLogin,
+    BuildContext ctx,
   ) submitfn;
   final bool isLoading;
   @override
@@ -47,6 +48,7 @@ class _AuthFormState extends State<AuthForm> {
         _userPassword.trim(),
         _name.trim(),
         widget.isLogin,
+        context,
       );
     }
   }
@@ -59,42 +61,97 @@ class _AuthFormState extends State<AuthForm> {
       child: Center(
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (!widget.isLogin)
+          child: Container(
+            height: widget.isLogin
+                ? MediaQuery.of(context).size.height * 0.40
+                : MediaQuery.of(context).size.height * 0.50,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (!widget.isLogin)
+                  Container(
+                    width: double.infinity,
+                    child: Text(
+                      'Name',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: getColor(widget.isLogin, nameNode.hasFocus),
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                if (!widget.isLogin)
+                  TextFormField(
+                    focusNode: nameNode,
+                    style: TextStyle(
+                      color: widget.isLogin
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).accentColor,
+                    ),
+                    key: ValueKey('name'),
+                    validator: (value) {
+                      if (value!.isEmpty || value.length < 4) {
+                        return 'Please enter atleast 4 characters';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      // labelText: 'Name',
+                      // labelStyle: TextStyle(
+                      //   color: getColor(
+                      //     widget.isLogin,
+                      //     nameNode.hasFocus,
+                      //   ),
+                      // ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: getColor(widget.isLogin, false),
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Color(0XFF7DEA82),
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onSaved: (value) {
+                      _name = value!;
+                    },
+                  ),
                 Container(
                   width: double.infinity,
                   child: Text(
-                    'Name',
+                    'Email',
                     textAlign: TextAlign.left,
                     style: TextStyle(
-                      color: getColor(widget.isLogin, nameNode.hasFocus),
+                      color: getColor(widget.isLogin, emailNode.hasFocus),
                       fontSize: 16,
                     ),
                   ),
                 ),
-              if (!widget.isLogin)
                 TextFormField(
-                  focusNode: nameNode,
+                  focusNode: emailNode,
                   style: TextStyle(
                     color: widget.isLogin
                         ? Theme.of(context).primaryColor
                         : Theme.of(context).accentColor,
                   ),
-                  key: ValueKey('name'),
+                  key: ValueKey('email'),
                   validator: (value) {
-                    if (value!.isEmpty || value.length < 4) {
-                      return 'Please enter atleast 4 characters';
+                    if (value!.isEmpty || !value.contains('@')) {
+                      return 'Please enter a valid email address';
                     }
                     return null;
                   },
+                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    // labelText: 'Name',
+                    // labelText: 'Email Address',
                     // labelStyle: TextStyle(
                     //   color: getColor(
                     //     widget.isLogin,
-                    //     nameNode.hasFocus,
+                    //     emailNode.hasFocus,
                     //   ),
                     // ),
                     enabledBorder: OutlineInputBorder(
@@ -111,136 +168,86 @@ class _AuthFormState extends State<AuthForm> {
                     ),
                   ),
                   onSaved: (value) {
-                    _name = value!;
+                    _userEmail = value!;
                   },
                 ),
-              Container(
-                width: double.infinity,
-                child: Text(
-                  'Email',
-                  textAlign: TextAlign.left,
+                Container(
+                  width: double.infinity,
+                  child: Text(
+                    'Password',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      color: getColor(widget.isLogin, passwordNode.hasFocus),
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  focusNode: passwordNode,
                   style: TextStyle(
-                    color: getColor(widget.isLogin, emailNode.hasFocus),
-                    fontSize: 16,
+                    color: widget.isLogin
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).accentColor,
                   ),
-                ),
-              ),
-              TextFormField(
-                focusNode: emailNode,
-                style: TextStyle(
-                  color: widget.isLogin
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).accentColor,
-                ),
-                key: ValueKey('email'),
-                validator: (value) {
-                  if (value!.isEmpty || !value.contains('@')) {
-                    return 'Please enter a valid email address';
-                  }
-                  return null;
-                },
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  // labelText: 'Email Address',
-                  // labelStyle: TextStyle(
-                  //   color: getColor(
-                  //     widget.isLogin,
-                  //     emailNode.hasFocus,
-                  //   ),
-                  // ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: getColor(widget.isLogin, false),
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color(0XFF7DEA82),
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                onSaved: (value) {
-                  _userEmail = value!;
-                },
-              ),
-              Container(
-                width: double.infinity,
-                child: Text(
-                  'Password',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    color: getColor(widget.isLogin, passwordNode.hasFocus),
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              TextFormField(
-                focusNode: passwordNode,
-                style: TextStyle(
-                  color: widget.isLogin
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).accentColor,
-                ),
-                key: ValueKey('password'),
-                validator: (value) {
-                  if (value!.isEmpty || value.length < 7) {
-                    return "Password must be atleast 7 characters long";
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  // labelText: 'Password',
-                  // labelStyle: TextStyle(
-                  //   color: getColor(
-                  //     widget.isLogin,
-                  //     passwordNode.hasFocus,
-                  //   ),
-                  // ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: getColor(widget.isLogin, false),
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color(0XFF7DEA82),
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                onSaved: (value) {
-                  _userPassword = value!;
-                },
-                obscureText: true,
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              if (widget.isLoading) CircularProgressIndicator(),
-              if (!widget.isLoading)
-                ButtonTheme(
-                  buttonColor: Color(0XFF7DEA82),
-                  minWidth: double.infinity,
-                  height: 55,
-                  child: RaisedButton(
-                    onPressed: _trySubmit,
-                    child: Text(
-                      widget.isLogin ? 'Login' : 'Create Account',
-                      style: TextStyle(
-                        // fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                  key: ValueKey('password'),
+                  validator: (value) {
+                    if (value!.isEmpty || value.length < 7) {
+                      return "Password must be atleast 7 characters long";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    // labelText: 'Password',
+                    // labelStyle: TextStyle(
+                    //   color: getColor(
+                    //     widget.isLogin,
+                    //     passwordNode.hasFocus,
+                    //   ),
+                    // ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: getColor(widget.isLogin, false),
                       ),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0XFF7DEA82),
+                      ),
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
+                  onSaved: (value) {
+                    _userPassword = value!;
+                  },
+                  obscureText: true,
                 ),
-            ],
+                SizedBox(
+                  height: 12,
+                ),
+                if (widget.isLoading) CircularProgressIndicator(),
+                if (!widget.isLoading)
+                  ButtonTheme(
+                    buttonColor: Color(0XFF7DEA82),
+                    minWidth: double.infinity,
+                    height: 55,
+                    child: RaisedButton(
+                      onPressed: _trySubmit,
+                      child: Text(
+                        widget.isLogin ? 'Login' : 'Create Account',
+                        style: TextStyle(
+                          // fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

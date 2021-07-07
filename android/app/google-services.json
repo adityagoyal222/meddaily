@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "431802184038-d52irj30vj6qg6tdm9t15rugb4r1s6f2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.meddaily",
+            "certificate_hash": "a9d3ee990300b6b8a84d76fed16194e6b9feb0df"
+          }
+        },
+        {
           "client_id": "431802184038-16777u5hvkc2snvdbt98131tq8bg64v6.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meddaily/utils/app_icons_icons.dart';
 import 'package:meddaily/widgets/auth/auth_form.dart';
 
@@ -12,6 +13,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _isLogin = false;
   var _isLoading = false;
 
@@ -20,6 +22,7 @@ class _AuthScreenState extends State<AuthScreen> {
     String password,
     String name,
     bool isLogin,
+    BuildContext ctx,
   ) async {
     UserCredential authResult;
 
@@ -62,10 +65,10 @@ class _AuthScreenState extends State<AuthScreen> {
         _isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: Theme.of(context).errorColor,
+          backgroundColor: Theme.of(ctx).errorColor,
         ),
       );
     } catch (err) {
@@ -73,6 +76,55 @@ class _AuthScreenState extends State<AuthScreen> {
         _isLoading = false;
       });
       print(err);
+    }
+  }
+
+  Future<bool> isNewUser(User user) async {
+    bool exists = false;
+    try {
+      await FirebaseFirestore.instance
+          .doc("users/${user.uid}")
+          .get()
+          .then((doc) {
+        if (doc.exists)
+          exists = false;
+        else
+          exists = true;
+      });
+      return exists;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<String?> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount!.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+      await _auth.signInWithCredential(credential);
+      if (await isNewUser(FirebaseAuth.instance.currentUser!)) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .set({
+          "name": FirebaseAuth.instance.currentUser!.displayName.toString(),
+          "email": FirebaseAuth.instance.currentUser!.email.toString(),
+          "isAdmin": false,
+        });
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message!),
+          backgroundColor: Theme.of(context).errorColor,
+        ),
+      );
     }
   }
 
@@ -150,7 +202,7 @@ class _AuthScreenState extends State<AuthScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: _signInWithGoogle,
                   child: Container(
                     margin: EdgeInsets.only(
                       left: MediaQuery.of(context).size.width * 0.02,
