@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meddaily/utils/app_icons_icons.dart';
 import 'package:meddaily/widgets/auth/auth_form.dart';
@@ -108,13 +109,13 @@ class _AuthScreenState extends State<AuthScreen> {
         idToken: googleSignInAuthentication.idToken,
       );
       await _auth.signInWithCredential(credential);
-      if (await isNewUser(FirebaseAuth.instance.currentUser!)) {
+      if (await isNewUser(_auth.currentUser!)) {
         await FirebaseFirestore.instance
             .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .doc(_auth.currentUser!.uid)
             .set({
-          "name": FirebaseAuth.instance.currentUser!.displayName.toString(),
-          "email": FirebaseAuth.instance.currentUser!.email.toString(),
+          "name": _auth.currentUser!.displayName.toString(),
+          "email": _auth.currentUser!.email.toString(),
           "isAdmin": false,
         });
       }
@@ -125,6 +126,24 @@ class _AuthScreenState extends State<AuthScreen> {
           backgroundColor: Theme.of(context).errorColor,
         ),
       );
+    }
+  }
+
+  Future<String?> _signInWithFacebook() async {
+    final facebookLogin = FacebookLogin();
+    final FacebookLoginResult facebookLoginResult =
+        await facebookLogin.logIn(['email', 'public_profile']);
+    FacebookAccessToken facebookAccessToken = facebookLoginResult.accessToken;
+    AuthCredential authCredential =
+        FacebookAuthProvider.credential(facebookAccessToken.token);
+    User fbUser;
+    fbUser = (await _auth.signInWithCredential(authCredential)).user!;
+    if (await isNewUser(fbUser)) {
+      await FirebaseFirestore.instance.collection('users').doc(fbUser.uid).set({
+        "name": fbUser.displayName.toString(),
+        "email": fbUser.email.toString(),
+        "isAdmin": false,
+      });
     }
   }
 
@@ -230,7 +249,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: _signInWithFacebook,
                   child: Container(
                     margin: EdgeInsets.only(
                       left: MediaQuery.of(context).size.width * 0.02,
