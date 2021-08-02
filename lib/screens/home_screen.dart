@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:meddaily/screens/product_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -15,7 +16,6 @@ class HomeScreen extends StatelessWidget {
                 await googleSignIn.signOut();
                 await FirebaseAuth.instance.signOut();
               } catch (e) {
-                print(e);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text("error"),
@@ -32,6 +32,13 @@ class HomeScreen extends StatelessWidget {
           style: TextStyle(color: Theme.of(context).accentColor),
         ),
       ),
+      body: Container(
+          child: FlatButton(
+        child: Text("Products List Page"),
+        onPressed: () {
+          Navigator.of(context).pushNamed(ProductListScreen.routeName);
+        },
+      )),
     );
   }
 }

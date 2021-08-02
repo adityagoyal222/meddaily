@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:meddaily/db/user_db.dart';
 import 'package:meddaily/utils/app_icons_icons.dart';
 import 'package:meddaily/widgets/auth/auth_form.dart';
 
@@ -44,13 +45,11 @@ class _AuthScreenState extends State<AuthScreen> {
           email: email,
           password: password,
         );
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(authResult.user!.uid)
-            .set({
-          "name": name,
+        final user_db = UserDatabaseService();
+        user_db.addUser({
+          "id": authResult.user!.uid,
           "email": email,
-          "isAdmin": false,
+          "name": name,
         });
         setState(() {
           _isLoading = false;
@@ -110,13 +109,11 @@ class _AuthScreenState extends State<AuthScreen> {
       );
       await _auth.signInWithCredential(credential);
       if (await isNewUser(_auth.currentUser!)) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(_auth.currentUser!.uid)
-            .set({
-          "name": _auth.currentUser!.displayName.toString(),
+        final user_db = UserDatabaseService();
+        user_db.addUser({
+          "id": _auth.currentUser!.uid,
           "email": _auth.currentUser!.email.toString(),
-          "isAdmin": false,
+          "name": _auth.currentUser!.displayName.toString(),
         });
       }
     } on FirebaseAuthException catch (e) {
@@ -142,7 +139,12 @@ class _AuthScreenState extends State<AuthScreen> {
       await FirebaseFirestore.instance.collection('users').doc(fbUser.uid).set({
         "name": fbUser.displayName.toString(),
         "email": fbUser.email.toString(),
-        "isAdmin": false,
+      });
+      final user_db = UserDatabaseService();
+      user_db.addUser({
+        "id": fbUser.uid,
+        "email": fbUser.displayName.toString(),
+        "name": fbUser.email.toString(),
       });
     }
   }
