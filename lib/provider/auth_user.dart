@@ -6,6 +6,7 @@ class AuthUser {
   final String uid;
   final String email;
   final String name;
+  final String? contact;
   Address? address;
   UserType userType;
 
@@ -13,6 +14,7 @@ class AuthUser {
     required this.uid,
     required this.email,
     required this.name,
+    this.contact,
     this.address,
     this.userType = UserType.Customer,
   });
@@ -34,6 +36,7 @@ class AuthUser {
             )
           : null,
       userType: data['userType'] ?? UserType.Customer,
+      contact: data['contact'] ?? null,
     );
   }
 }

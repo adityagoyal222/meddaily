@@ -1,14 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:meddaily/db/auth_user_db.dart';
 import 'package:meddaily/db/cart_db.dart';
+import 'package:meddaily/db/category_db.dart';
 import 'package:meddaily/db/product_db.dart';
 import 'package:meddaily/db/user_db.dart';
+import 'package:meddaily/provider/auth_user.dart';
 import 'package:meddaily/provider/cart.dart';
+import 'package:meddaily/provider/category.dart';
 import 'package:meddaily/provider/product.dart';
 import 'package:meddaily/screens/auth_screen.dart';
+import 'package:meddaily/screens/categories_screen.dart';
 import 'package:meddaily/screens/home_screen.dart';
 import 'package:meddaily/screens/product_list_screen.dart';
+import 'package:meddaily/screens/user_profile_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -58,11 +64,23 @@ class MyApp extends StatelessWidget {
               create: (_) => ProductDatabaseService().streamProducts(),
               initialData: [],
             ),
+            StreamProvider<List<Category>>(
+              create: (_) => CategoryDatabaseService().streamCategory(),
+              initialData: [],
+            ),
             if (FirebaseAuth.instance.currentUser != null)
               StreamProvider<List<Cart>>(
                 create: (_) => CartDatabaseService()
                     .streamCarts(FirebaseAuth.instance.currentUser!),
                 initialData: [],
+              ),
+            if (FirebaseAuth.instance.currentUser != null)
+              StreamProvider<AuthUser>(
+                create: (_) => AuthUserDatabaseService(
+                        FirebaseAuth.instance.currentUser!.uid)
+                    .userData,
+                initialData: AuthUser(
+                    email: '', name: '', uid: '', userType: UserType.Customer),
               )
           ],
           child: MaterialApp(
@@ -95,6 +113,8 @@ class MyApp extends StatelessWidget {
             ),
             routes: {
               ProductListScreen.routeName: (ctx) => ProductListScreen(),
+              CategoriesScreen.routeName: (ctx) => CategoriesScreen(),
+              UserProfileScreen.routeName: (ctx) => UserProfileScreen(),
             },
           ),
         );
