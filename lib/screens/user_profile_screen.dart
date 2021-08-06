@@ -1,12 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meddaily/provider/auth_user.dart';
 import 'package:meddaily/widgets/user_profile/change_password.dart';
 import 'package:provider/provider.dart';
 
-class UserProfileScreen extends StatelessWidget {
+class UserProfileScreen extends StatefulWidget {
   static const routeName = '/user-profile';
 
+  @override
+  _UserProfileScreenState createState() => _UserProfileScreenState();
+}
+
+class _UserProfileScreenState extends State<UserProfileScreen> {
   _showBottomSheet(BuildContext ctx, Widget yourWidget) {
     return showModalBottomSheet<dynamic>(
         isScrollControlled: true,
@@ -219,7 +225,21 @@ class UserProfileScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15)),
                 height: 50,
-                onPressed: () {},
+                onPressed: () async {
+                  final GoogleSignIn googleSignIn = GoogleSignIn();
+                  try {
+                    await googleSignIn.signOut();
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.pop(context);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("error"),
+                        backgroundColor: Theme.of(context).errorColor,
+                      ),
+                    );
+                  }
+                },
                 child: Text(
                   'Sign out',
                   style: TextStyle(
