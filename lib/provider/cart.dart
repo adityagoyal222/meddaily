@@ -3,42 +3,42 @@ import 'package:meddaily/db/product_db.dart';
 
 class Cart {
   final String id;
-  final String customerID;
   final List<Item> items;
-  final double total;
+  double total;
 
   Cart({
     required this.id,
-    required this.customerID,
     required this.items,
     required this.total,
   });
 
   factory Cart.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<dynamic, dynamic>;
+    print("cart_data ${doc.id}");
     return Cart(
       id: doc.id,
-      customerID: data['customerID'] ?? '',
-      items: data['items']
-          .map(
-            (item) => Item(
-              productID: item['productID'],
-              quantity: item['quantity'],
-              price: item['price'].toDouble(),
-              total: item['total'].toDouble(),
-            ),
-          )
-          .toList(),
-      total: data['total'].toDouble(),
+      items: data['items'] != null
+          ? List<Item>.from(data['items']
+              .map(
+                (item) => Item(
+                  productID: item['productID'],
+                  quantity: item['quantity'],
+                  price: item['price'].toDouble(),
+                  total: item['total'].toDouble(),
+                ),
+              )
+              .toList())
+          : [],
+      total: data['total'] != null ? data['total'].toDouble() : 0.0,
     );
   }
 }
 
 class Item {
-  final String productID;
-  final int quantity;
-  final double price;
-  final double total;
+  String productID;
+  int quantity;
+  double price;
+  double total;
 
   Item({
     required this.productID,

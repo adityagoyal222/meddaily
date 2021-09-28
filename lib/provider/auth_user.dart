@@ -21,9 +21,8 @@ class AuthUser {
 
   factory AuthUser.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<dynamic, dynamic>;
-
     return AuthUser(
-      uid: data['uid'] ?? '',
+      uid: doc.id,
       email: data['email'] ?? '',
       name: data['name'] ?? '',
       address: data['address'] != null

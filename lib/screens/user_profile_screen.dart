@@ -65,7 +65,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundColor: Colors.blue,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(50),
+                    ),
+                    child: Image.network(
+                        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80'),
+                  ),
                 ),
                 Text(
                   '${currUser.name}',

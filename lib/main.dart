@@ -2,17 +2,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:meddaily/db/auth_user_db.dart';
+import 'package:meddaily/db/bookmark_db.dart';
 import 'package:meddaily/db/cart_db.dart';
 import 'package:meddaily/db/category_db.dart';
+import 'package:meddaily/db/order_db.dart';
 import 'package:meddaily/db/product_db.dart';
 import 'package:meddaily/db/user_db.dart';
 import 'package:meddaily/provider/auth_user.dart';
+import 'package:meddaily/provider/bookmark.dart';
 import 'package:meddaily/provider/cart.dart';
 import 'package:meddaily/provider/category.dart';
+import 'package:meddaily/provider/order.dart';
 import 'package:meddaily/provider/product.dart';
 import 'package:meddaily/screens/auth_screen.dart';
+import 'package:meddaily/screens/bookmark_screen.dart';
+import 'package:meddaily/screens/cart_list_screen.dart';
 import 'package:meddaily/screens/categories_screen.dart';
 import 'package:meddaily/screens/home_screen.dart';
+import 'package:meddaily/screens/order_list_screen.dart';
+import 'package:meddaily/screens/product_detail_screen.dart';
 import 'package:meddaily/screens/product_list_screen.dart';
 import 'package:meddaily/screens/user_profile_screen.dart';
 import 'package:provider/provider.dart';
@@ -75,6 +83,18 @@ class MyApp extends StatelessWidget {
                 initialData: [],
               ),
             if (FirebaseAuth.instance.currentUser != null)
+              StreamProvider<List<Order>>(
+                create: (_) => OrderDatabaseService()
+                    .streamOrders(FirebaseAuth.instance.currentUser!),
+                initialData: [],
+              ),
+            if (FirebaseAuth.instance.currentUser != null)
+              StreamProvider<List<Bookmark>>(
+                create: (_) => BookmarkDatabaseService()
+                    .streamBookmarks(FirebaseAuth.instance.currentUser!),
+                initialData: [],
+              ),
+            if (FirebaseAuth.instance.currentUser != null)
               StreamProvider<AuthUser>(
                 create: (_) => AuthUserDatabaseService(
                         FirebaseAuth.instance.currentUser!.uid)
@@ -115,6 +135,10 @@ class MyApp extends StatelessWidget {
               ProductListScreen.routeName: (ctx) => ProductListScreen(),
               CategoriesScreen.routeName: (ctx) => CategoriesScreen(),
               UserProfileScreen.routeName: (ctx) => UserProfileScreen(),
+              ProductDetailScreen.routeName: (ctx) => ProductDetailScreen(),
+              CartListScreen.routeName: (ctx) => CartListScreen(),
+              OrderListScreen.routeName: (ctx) => OrderListScreen(),
+              BookmarkScreen.routename: (ctx) => BookmarkScreen(),
             },
           ),
         );
